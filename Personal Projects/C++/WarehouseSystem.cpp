@@ -1,75 +1,74 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <vector>
 using namespace std;
 
-enum ItemCategory {ELECTRONICS, FOOD, CLOTHING};
+class Item {
+    int ID;
+    string Name;
+    double Price = 0;
+    public:
+        Item(int id, string name, double price){
+            ID = id;
+            Name = name;
+            Price = price; 
+        }
 
-struct Item {
-    string name;
-    double price;
-    ItemCategory category;
+        void setID(int id) { ID = id; }
+        void setName(string name) { Name = name; }
+        void setPrice(double price) { Price = price; }
+        void putDiscount(double percent){
+            if (Price)  
+                Price -= Price*(percent/100.0);
+            else    
+                cout << "Please Define Price First !!!";
+        }
+        
+        void Display(bool showID = false){
+            cout << left;
+            if (showID){
+                cout << setw(10) << ("ID: " + to_string(ID))  
+                     << "| ";
+            }
+            cout << setw(15) << ("Item: " + Name) 
+                 << "| " 
+                 << "Price: $" << Price << "\n";
+        }
 };
-
-void Display(Item *ptr){    
-    cout << left;
-    cout << setw(15) << ("Item: "+ptr->name) 
-         << "| " 
-         << "Price: $" << ptr->price << "\n";
-}
-
-void ApplyDiscount(double &price, double percent){
-    price -= (price * (percent / 100));
-}
 
 void separator(char symbol, int length){
   for (int i=0;i<length;i++) cout << symbol;
   cout << '\n';
 }
 
-int main(){ 
-    Item* ItemArr=nullptr;
-    int CurrentSize=0;
-    bool running=true;
+int main(){
+    vector<Item> ItemVec;
+    bool running = true;
     while (running){
-        cout << "----{ INVENTORY SYSTEM }----\n";
-        cout <<  "1) Add Item\n2) Display Inventory\n3) Apply Discount\n4) Exit\n";
+        cout << "----{ SMART INVENTORY SYSTEM }----\n";
+        cout <<  "1) Add Item\n2) Display Inventory \n3) Apply Discount\n4) Exit\n";
         cout << "[ Enter choice (1,2,3,4) ]-> ";
         int choice;
         cin >> choice;
-        separator('~',35);
+        cout << '\n';
         switch (choice){
             case 1:{
                 bool AddMore=true;
                 while(AddMore){
-                    Item item;
-                    int CategoryNum;
+                    int ItemID;
+                    string ItemName;
+                    double ItemPrice;
+                    cout << "Enter Item ID: ";
+                    cin >> ItemID;
+                    separator('-',30);
                     cout << "Enter Item Name: ";
-                    cin >> item.name;
+                    cin >> ItemName;
                     separator('-',30);
                     cout << "Enter Item Price: ";
-                    cin >> item.price;
+                    cin >> ItemPrice;
                     separator('-',30);
-                    cout << "Select Item Category:-\n1. Electronics\n2. Food\n3. Clothing\n";
-                    cout << "Choice...[1,2,3]: ";
-                    cin >> CategoryNum;
-                    item.category = (ItemCategory)(--CategoryNum);
-                    separator('-',30);
-
-                    //Create a new larger block of memory
-                    Item* temp=new Item[CurrentSize+1];
-                    //Copy data from old block to the new one
-                    for (int i=0;i<CurrentSize;i++)
-                        temp[i]=ItemArr[i];
-                    //Add new data
-                    temp[CurrentSize]=item;
-                    //Increment CurrentSize
-                    CurrentSize++;
-                    //Release the old block
-                    delete[] ItemArr;
-                    //Re-assign to old block
-                    ItemArr=temp;
-
+                    ItemVec.push_back({ItemID, ItemName, ItemPrice});
                     cout << "Add More?...[Yes(1) | No(0)]: ";
                     cin >> AddMore;
                     if (AddMore) separator('~',35);
@@ -78,27 +77,35 @@ int main(){
             }
 
             case 2:{
-                if (CurrentSize==0){
-                    cout << "No Items in Inventory to Display!\n";
+                if (ItemVec.empty()){
+                    cout << "No Items in Inventory to Display !\n";
                     break;
                 }
+                bool showID;
+                cout << "Show ID? [Yes(1) | No(0)]: ";
+                cin >> showID;
+                separator('~',35);
                 cout << "----[ INVENTORY ITEMS ]----\n";   
-                for(int i=0;i<CurrentSize;i++)
-                Display(&ItemArr[i]);
+                for(Item item: ItemVec){
+                    if (showID)
+                        item.Display(showID);
+                    else
+                        item.Display();
+                    }
                 break; 
             }
-            
+
             case 3:{
-                if (CurrentSize==0){
-                    cout << "No Items in Inventory to Apply Discount!\n";
+                if (ItemVec.empty()){
+                    cout << "No Items in Inventory to Apply Discount !\n";
                     break;
                 }
                 double discountPercent;
                 cout << "Enter Discount Percent: ";
                 cin >> discountPercent;
-                for(int i=0;i<CurrentSize;i++)
-                    ApplyDiscount(ItemArr[i].price, discountPercent);
-                cout << "Discount Applied Successfully!\n";
+                for(Item &item: ItemVec)
+                    item.putDiscount(discountPercent);
+                cout << "Discount Applied Successfully !\n";
                 break;
             }
 
@@ -107,9 +114,6 @@ int main(){
                 running=false;
                 break;
         }
-        separator('~',35);
+        cout << '\n';
     }
-    //Release the ItemArr block
-    delete[] ItemArr;
-    return 0;
 }
