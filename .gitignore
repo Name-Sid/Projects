@@ -1,0 +1,18 @@
+# Compiled Executables
+*.exe
+*.out
+*.app
+
+# Intermediate Objects
+*.o
+*.obj
+
+# IDE Folders (VS Code / Visual Studio)
+.vscode/
+.vs/
+bin/
+build/
+
+# Python junk
+__pycache__/
+*.pyc
